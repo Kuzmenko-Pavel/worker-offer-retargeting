@@ -1,0 +1,9 @@
+CREATE TABLE IF NOT EXISTS Session
+(
+id INT8 NOT NULL,
+id_ofr INT8 NOT NULL,
+uniqueHits SMALLINT DEFAULT 1,
+UNIQUE (id,id_ofr) ON CONFLICT IGNORE,
+FOREIGN KEY(id_ofr) REFERENCES Offer(id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_Session_id_offerId ON Session (id ASC, id_ofr ASC);

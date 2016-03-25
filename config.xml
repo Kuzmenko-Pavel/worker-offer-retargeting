@@ -1,0 +1,239 @@
+<?xml version="1.0"?>
+<root id="0">
+<!--настройки сервера-->
+<server>
+    <!--IP сервера. Ссылка на редирект по рекламному предложению содержит в себе адрес сервера, который её создал-->
+    <ip>212.113.34.134</ip>
+    <lock_file>/run/workerd/lock</lock_file>
+    <pid_file>/run/workerd/pid</pid_file>
+    <user>www-data</user>
+    <group>www-data</group>
+    <!--путь к файлу сокета-->
+    <socket_path>/run/workerd/sockr</socket_path>
+    <!--количество ниток-->
+    <children>1</children>
+
+    <!--путь к очереди сообщений-->
+    <mq_path>guest:guest@localhost//</mq_path>
+
+    <!--путь к фалу базы данных sqlite или :memory:-->
+    <sqlite>
+        <!--файл базы-->
+        <!--db>:memory:</db-->
+        <db>./db</db>
+        <!--путь к каталогу дампа sqlite базы-->
+        <schema>db_dump</schema>
+        <!--путь к csv файлу содержимого таблицы GeoRerions-->
+        <geo_csv>db_dump/GEO</geo_csv>
+        <geo_not_found_csv>db_dump/GEO_NOT_FOUND</geo_not_found_csv>
+    </sqlite>
+
+    <!--Путь к файлу базы данных MaxMind GeoIP City Edition-->
+    <geocountry_path>/usr/share/GeoIP/GeoIP.dat</geocountry_path>
+    <geocity_path>/usr/share/GeoIP/GeoLiteCity.dat</geocity_path>
+    <cookie>
+        <name>yottos_unique_id</name>
+        <domain>.yottos.com</domain>
+        <path>/</path>
+    </cookie>
+
+    <!--Название скрипта обработки редиректа-->
+    <redirect_script>/redirect</redirect_script>
+
+    <templates>
+        <!-- Шаблон информера с тизерами со следующими подстановками (существовавший шаблон):
+            %1%	    CSS
+        %2%	    JSON для initads (предложения, которые должны показаться на первой странице)
+        %3%	    количество товаров на с транице
+        %4%	    ссылка на скрипт получения следующей порции предложений в jso-->
+        <teaser>template/teaser.html</teaser>
+        <!-- Шаблон информера с баннером со следующими подстановками:
+         %1%	    CSS
+         %2%	    swfobject
+         %3%	    JSON initads-->
+        <banner>template/banner.html</banner>
+        <error>template/error.html</error>
+        <swfobject>template/swfobject.js</swfobject>
+    </templates>
+
+    <!--время обновление временных кампаний(HH:MM:SS)-->
+    <time_update>00:15:00</time_update>
+</server>
+
+<!--ретаргетинг-->
+<retargeting>
+    <!--представление, в процентах, в исходящей выборке-->
+    <percentage>50</percentage>
+    <!--Redis-сервер с БД о Ретаргетинге-->
+    <redis>
+            <!--IP-адрес-->
+            <host>127.0.0.1</host>
+            <!--порт-->
+            <port>6385</port>
+            <timeout>1000</timeout>
+    </redis>
+    <!--период жизни(ЧЧ:ММ:СС)-->
+    <ttl>06:00:00</ttl>
+</retargeting>
+
+<!--история-->
+<history>
+    <offer_by_campaign_unique>1</offer_by_campaign_unique>
+
+    <!--история показа-->
+    <views>
+        <ttl>10:00:00</ttl>
+        <!--Redis-сервер с БД о истории показов пользователя-->
+        <redis>
+            <!--IP-адрес-->
+            <host>127.0.0.1</host>
+            <!--порт-->
+            <port>6381</port>
+            <timeout>1000</timeout>
+        </redis>
+    </views>
+    <!--кратскосрочная история-->
+    <short_term>
+        <!--Весовая финкция(умножается на максимальный рейтинг выборки)
+                0 - отключить
+                1 - максимальный рейтинг
+        -->
+        <value>0.8</value>
+        <ttl>24:00:00</ttl>
+        <!--Redis-сервер с БД о краткосрочной истории пользователя-->
+        <redis>
+            <!--IP-адрес-->
+            <host>127.0.0.1</host>
+            <!--порт-->
+            <port>6380</port>
+            <timeout>1000</timeout>
+        </redis>
+    </short_term>
+    <!--долгосрочная история-->
+    <long_term>
+        <!--Весовая финкция(умножается на максимальный рейтинг выборки)
+                0 - отключить
+                1 - максимальный рейтинг
+        -->
+        <value>0</value>
+        <!--Redis-сервер с БД о долгосрочной истории пользователя-->
+        <redis>
+            <!--IP-адрес-->
+            <host>127.0.0.1</host>
+            <!--порт-->
+            <port>6382</port>
+            <timeout>1000</timeout>
+        </redis>
+    </long_term>
+    <!--контекст страницы-->
+    <context>
+        <!--Весовая финкция(умножается на максимальный рейтинг выборки)
+                0 - отключить
+                1 - максимальный рейтинг
+        -->
+        <value>0.2</value>
+        <!--"Продолжительность жизни" ключей в базе истории контекста страницы-->
+    </context>
+    <!--поисковым запросам пользователя страницы-->
+    <search>
+        <!--Весовая финкция(умножается на максимальный рейтинг выборки)
+                0 - отключить
+                1 - максимальный рейтинг
+        -->
+        <value>1</value>
+    </search>
+    <category>
+        <value>1</value>
+        <!--Redis-сервер с БД о категориях пользователя-->
+        <redis>
+            <!--IP-адрес-->
+            <host>127.0.0.1</host>
+            <!--порт-->
+            <port>6384</port>
+            <timeout>100</timeout>
+        </redis>
+    </category>
+</history>
+
+<!--Параметры подключения к базам данных-->
+<mongo>
+    <!--Параметры подключения к основной базе данных-->
+    <main>
+        <!--Адрес сервера баз данных-->
+        <host>srv-2.yottos.com:27018</host>
+        <host>srv-9.yottos.com:27018</host>
+        <host>srv-1.yottos.com:27018</host>
+        <!--Название базы данных-->
+        <db>getmyad_db</db>
+        <!--Название группы реплик (если база данных находится в Replica Set)-->
+        <!--set></set-->
+        <set>vsrv</set>
+        <!--Может ли сервис подключаться к slave серверам базам данных.
+        Это балансирует нагрузку в режиме только для чтения, но появляется
+        вероятность чтения не самых свежих данных (разница от мастера до
+        нескольких секунд).-->
+        <slave>1</slave>
+
+        <login></login>
+        <passwd></passwd>
+    </main>
+    <!--Параметры подключения к базе данных журнала-->
+    <log>
+        <!--Адрес сервера баз данных-->
+        <host>srv-4.yottos.com:27017</host>
+        <!--Название базы данных-->
+        <db>getmyad</db>
+        <!--Название группы реплик (если база данных находится в Replica Set)-->
+        <set></set>
+        <!--Может ли сервис подключаться к slave серверам базам данных.
+        Это балансирует нагрузку в режиме только для чтения, но появляется
+        вероятность чтения не самых свежих данных (разница от мастера до
+        нескольких секунд).-->
+        <slave>0</slave>
+
+        <login></login>
+        <passwd></passwd>
+
+        <collection_impression>log.impressions</collection_impression>
+        <collection_block>log.impressions.block</collection_block>
+    </log>
+</mongo>
+
+<sphinx>
+    <!--host>213.186.121.76</host-->
+    <host>127.0.0.1</host>
+    <port>8312</port>
+    <index>worker</index>
+    <!--all from /usr/include/sphinxclient.h-->
+    <mach_mode>SPH_MATCH_EXTENDED2</mach_mode>
+    <rank_mode>SPH_RANK_SPH04</rank_mode>
+    <sort_mode>SPH_SORT_RELEVANCE</sort_mode>
+    <fields>
+        <exactly_phrases>100</exactly_phrases>
+        <title>80</title>
+        <description>30</description>
+        <keywords>70</keywords>
+        <phrases>90</phrases>
+        <!--minuswords>100</minuswords-->
+    </fields>
+</sphinx>
+
+<log>
+    <coretime>0</coretime>
+    <outsize>0</outsize>
+    <ip>0</ip>
+    <country>0</country>
+    <region>0</region>
+    <cookie>0</cookie>
+    <context>0</context>
+    <search>0</search>
+    <informerId>0</informerId>
+    <location>0</location>
+    <sphinx>0</sphinx>
+    <RetargetingOfferIds>0</RetargetingOfferIds>
+    <OutPutOfferIds>0</OutPutOfferIds>
+    <monitor>0</monitor>
+    <redis>0</redis>
+</log>
+
+</root>
