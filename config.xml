@@ -4,8 +4,8 @@
 <server>
     <!--IP сервера. Ссылка на редирект по рекламному предложению содержит в себе адрес сервера, который её создал-->
     <ip>212.113.34.134</ip>
-    <lock_file>/run/workerd/lock</lock_file>
-    <pid_file>/run/workerd/pid</pid_file>
+    <lock_file>/run/workerd/lockr</lock_file>
+    <pid_file>/run/workerd/pidr</pid_file>
     <user>www-data</user>
     <group>www-data</group>
     <!--путь к файлу сокета-->

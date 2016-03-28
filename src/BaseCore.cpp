@@ -95,67 +95,6 @@ bool BaseCore::ProcessMQ()
                 m = mq_campaign_->getMessage();
             }
         }
-        {
-            // Проверка сообщений advertise.#
-            std::string m1, ofrId, cmgId;
-            mq_advertise_->Get(AMQP_NOACK);
-            m = mq_advertise_->getMessage();
-            stopCount = MAXCOUNT;
-            while(m->getMessageCount() > -1 && stopCount--)
-            {
-                mq_log_.push_back(m->getRoutingKey() + ":" +toString(m) + "</br>");
-
-                if(cfg->logMQ)
-                {
-                    std::clog<<"mq: cmd:"<<m->getRoutingKey()<<toString(m)<<std::endl;
-                }
-
-                m1 = toString(m);
-                if(m->getRoutingKey() == "advertise.update")
-                {
-                    if(cmdParser(m1,ofrId,cmgId))
-                    {
-                        mongo::Query q;
-#ifdef DUMMY
-                        q = mongo::Query("{$and: [{ \"retargeting\" : false}, {\"type\" : \"teaser\"}, { \"guid\" : \""+ofrId+"\"}]}");
-#else
-                        q = QUERY("guid" << ofrId);
-#endif // DUMMY
-                        pdb->OfferRatingLoad(q);
-                    }
-                }
-                else if(m->getRoutingKey() == "advertise.delete")
-                {
-                    if(cmdParser(m1,ofrId,cmgId))
-                    {
-                        pdb->OfferRemove(ofrId);
-                    }
-                }
-                mq_advertise_->Get(AMQP_NOACK);
-                m = mq_advertise_->getMessage();
-            }
-        }
-        {
-            // Проверка сообщений informer.#
-            mq_informer_->Get(AMQP_NOACK);
-            m = mq_informer_->getMessage();
-            stopCount = MAXCOUNT;
-            while(m->getMessageCount() > -1 && stopCount--)
-            {
-                mq_log_.push_back(m->getRoutingKey() + ":" +toString(m) + "</br>");
-
-                if(cfg->logMQ)
-                {
-                    std::clog<<"mq: cmd:"<<m->getRoutingKey()<<toString(m)<<std::endl;
-                }
-                else if(m->getRoutingKey() == "informer.updateRating")
-                {
-                    pdb->loadRating(toString(m));
-                }
-                mq_informer_->Get(AMQP_NOACK);
-                m = mq_informer_->getMessage();
-            }
-        }
     }
     catch (AMQPException &ex)
     {
@@ -184,8 +123,6 @@ void BaseCore::LoadAllEntities()
     //Загрузили все кампании
     pdb->CampaignLoad(std::string());
 
-    //загрузили рейтинг
-    pdb->loadRating();
     cfg->pDb->indexRebuild();
 
 }
@@ -209,29 +146,16 @@ void BaseCore::InitMessageQueue()
         std::string postfix = to_iso_string(now);
         boost::replace_first(postfix, ".", ",");
 
-        std::string mq_advertise_name( "getmyad.advertise." + postfix );
         std::string mq_campaign_name( "getmyad.campaign." + postfix );
-        std::string mq_informer_name( "getmyad.informer." + postfix );
-        std::string mq_account_name( "getmyad.account." + postfix );
 
         // Объявляем очереди
         mq_campaign_ = amqp_->createQueue();
         mq_campaign_->Declare(mq_campaign_name, AMQP_AUTODELETE | AMQP_EXCLUSIVE);
-        mq_informer_ = amqp_->createQueue();
-        mq_informer_->Declare(mq_informer_name, AMQP_AUTODELETE | AMQP_EXCLUSIVE);
-        mq_advertise_ = amqp_->createQueue();
-        mq_advertise_->Declare(mq_advertise_name, AMQP_AUTODELETE | AMQP_EXCLUSIVE);
-        mq_account_ = amqp_->createQueue();
-        mq_account_->Declare(mq_account_name, AMQP_AUTODELETE | AMQP_EXCLUSIVE);
 
         // Привязываем очереди
-        exchange_->Bind(mq_advertise_name, "advertise.#");
         exchange_->Bind(mq_campaign_name, "campaign.#");
-        exchange_->Bind(mq_informer_name, "informer.#");
-        exchange_->Bind(mq_account_name, "account.#");
 
-        std::clog<<"Created ampq queues: "<<mq_campaign_name<<","<<mq_informer_name<<","
-                 <<mq_advertise_name<<","<<mq_account_name<<std::endl;
+        std::clog<<"Created ampq queues: "<<mq_campaign_name<<std::endl;
     }
     catch (AMQPException &ex)
     {

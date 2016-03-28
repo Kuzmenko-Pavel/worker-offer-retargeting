@@ -95,32 +95,20 @@ Params &Params::parse()
     }
 
 
-    if (params_.count("social") && params_["social"].is_string())
+    if (params_.count("retargetingOffer") && params_["retargetingOffer"].is_string())
     {
-        std::string soc = params_["social"];
-        replaceSymbol = boost::make_u32regex("([A-Za-z\\.:\\-\\s_]+;)|([A-Za-z\\.:\\-\\s_]+)");
-        soc = boost::u32regex_replace(soc,replaceSymbol,"");
-        boost::trim(soc);
-        if(soc != "")
-        {
-            boost::split(social, soc, boost::is_any_of(";"));
-        }
-    }
-
-    if (params_.count("place") && params_["place"].is_string())
-    {
-        std::string pla = params_["place"];
+        std::string pla = params_["retargetingOffer"];
         replaceSymbol = boost::make_u32regex("([A-Za-z\\.:\\-\\s_]+;)|([A-Za-z\\.:\\-\\s_]+)");
         pla = boost::u32regex_replace(pla,replaceSymbol,"");
         boost::trim(pla);
         if(pla != "")
         {
-            boost::split(place, pla, boost::is_any_of(";"));
+            boost::split(campaign, pla, boost::is_any_of(";"));
         }
     }
-    if (params_.count("exclude") && params_["exclude"].is_string())
+    if (params_.count("retargeting_exclude") && params_["retargeting_exclude"].is_string())
     {
-        std::string exc = params_["exclude"];
+        std::string exc = params_["retargeting_exclude"];
         replaceSymbol = boost::make_u32regex("([A-Za-z\\.:\\-\\s_]+;)|([A-Za-z\\.:\\-\\s_]+)");
         exc = boost::u32regex_replace(exc,replaceSymbol,"");
         boost::trim(exc);
@@ -129,9 +117,9 @@ Params &Params::parse()
             boost::split(exclude, exc, boost::is_any_of(";"));
         }
     }
-    if (params_.count("capacity") && params_["capacity"].is_number())
+    if (informer_.count("retargeting_capacity") && informer_["retargeting_capacity"].is_number())
     {
-        capacity = params_["capacity"];
+        capacity = informer_["retargeting_capacity"];
     }
     if (params_.count("informer_id") && params_["informer_id"].is_string())
     {
@@ -145,6 +133,63 @@ Params &Params::parse()
     if (params_.count("test") && params_["test"].is_boolean())
     {
         test_mode = params_["test"];
+    }
+    if (params_.count("retargeting") && params_["retargeting"].is_string())
+    {
+        std::string retargeting = params_["retargeting"];
+        if(retargeting != "")
+        {
+            boost::algorithm::to_lower(retargeting);
+            boost::split(retargeting_offers_, retargeting, boost::is_any_of(";"));
+            if (retargeting_offers_.size()> 50)
+            {
+                retargeting_offers_.erase(retargeting_offers_.begin()+49, retargeting_offers_.end());
+            }
+        }
+        for (auto i=retargeting_offers_.begin(); i != retargeting_offers_.end() ; ++i)
+        {
+            std::vector<std::string> par;
+            boost::split(par, *i, boost::is_any_of("~"));
+            if (!par.empty() && par.size() >= 4)
+            {
+                if (!par[0].empty())
+                {
+                    try
+                    {
+                        retargeting_offers_day_.insert(std::pair<const unsigned long,int>(stoul(par[0]),stoi(par[3])));
+                    }
+                    catch (std::exception const &ex)
+                    {
+                        Log::err("exception %s: name: %s while processing etargeting_offers: %s", typeid(ex).name(), ex.what(), (*i).c_str());
+                    }
+                }
+            }
+        }
+    }
+    if (params_.count("retargeting_view") && params_["retargeting_view"].is_string())
+    {
+        std::vector<std::string> retargeting_view_offers;
+        std::string retargeting_view = params_["retargeting_view"];
+        if(retargeting_view != "")
+        {
+            boost::split(retargeting_view_offers, retargeting_view, boost::is_any_of(";"));
+        }
+        for (unsigned i=0; i<retargeting_view_offers.size() ; i++)
+        {
+            std::vector<std::string> par;
+            boost::split(par, retargeting_view_offers[i], boost::is_any_of("~"));
+            if (!par.empty() && par.size() >= 2)
+            {
+                try
+                {
+                    retargeting_view_offers_.insert(std::pair<const unsigned long,int>(stol(par[0]),stoi(par[1])));
+                }
+                catch (std::exception const &ex)
+                {
+                    Log::err("exception %s: name: %s while processing retargeting_view_offers: %s", typeid(ex).name(), ex.what(), retargeting_view.c_str());
+                }
+            }
+        }
     }
 
     return *this;
@@ -169,11 +214,7 @@ boost::posix_time::ptime Params::getTime() const
 }
 std::string Params::getCampaigns() const
 {
-    return boost::algorithm::join(place, ", ");
-}
-std::string Params::getSocialCampaigns() const
-{
-    return boost::algorithm::join(social, ", ");
+    return boost::algorithm::join(campaign, ", ");
 }
 std::string Params::getExclude() const
 {
@@ -190,4 +231,17 @@ long long Params::getInformerIdInt() const
 unsigned int Params::getCapacity() const
 {
     return capacity;
+}
+std::map<const unsigned long,int> Params::getRetargetingOffersDayMap()
+{
+    return retargeting_offers_day_;
+}
+
+std::vector<std::string> Params::getRetargetingOffers()
+{
+    return retargeting_offers_;
+}
+std::map<const unsigned long,int> Params::getRetargetingViewOffers()
+{
+    return retargeting_view_offers_;
 }

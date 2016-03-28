@@ -15,7 +15,12 @@ Offer::Offer(unsigned long long id_int,
              float rating,
              int uniqueHits,
              bool social,
+             std::string account_id,
              int unique_by_campaign,
+             std::string Recommended,
+             std::string retid,
+             bool brending,
+             bool is_recommended,
              bool html_notification
              ):
     id_int(id_int),
@@ -24,7 +29,12 @@ Offer::Offer(unsigned long long id_int,
     rating(rating),
     uniqueHits(uniqueHits),
     social(social),
+    account_id(account_id),
     unique_by_campaign((unsigned)unique_by_campaign),
+    Recommended(Recommended),
+    retid(retid),
+    brending(brending),
+    is_recommended(is_recommended),
     html_notification(html_notification)
 {
     cmd = new char[len];
@@ -53,12 +63,20 @@ nlohmann::json Offer::toJson() const
     j["campaign_id"] = campaign_id;
     j["campaign_guid"] = campaign_guid;
     j["unique"] = uniqueHits;
-    j["class"] = "";
-    j["retargeting"] = 0;
-    j["is_recommended"] = 0;
-    j["retargeting_type"] = "all";
+    if (is_recommended)
+    {
+        j["c"] = "Rec";
+        j["branch"] = "NL32";
+    }
+    else
+    {
+        j["c"] = "Ret";
+        j["branch"] = "NL31";
+    }
+    j["retargeting"] = true;
+    j["is_recommended"] = is_recommended;
+    j["retargeting_type"] = "offer";
     j["html_notification"] = html_notification;
-    j["branch"] = "NL30";
     #ifdef DEBUG
         auto elapsed = std::chrono::high_resolution_clock::now() - start;
         long long microseconds = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();

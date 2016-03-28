@@ -39,7 +39,6 @@ public:
     /** \brief  Загружает все сущности, которые используются при показе
      *          рекламы. */
     void LoadAllEntities();
-    void LoadRetargetingEntities();
 
     void ReloadAllEntities();
 
@@ -48,9 +47,6 @@ public:
 
     /** \brief  Выводит состояние службы и некоторую статистику */
     std::string Status(const std::string &);
-
-       //clear session table
-    bool ClearSession(bool clearAll) { return pdb->ClearSession(clearAll); }
 
 
 private:
@@ -65,14 +61,6 @@ private:
     AMQPExchange *exchange_;
     /// Очередь сообщений об изменениях в кампаниях
     AMQPQueue *mq_campaign_;
-
-    /// Очередь сообщений об изменениях в информерах
-    AMQPQueue *mq_informer_;
-
-   /// Очередь сообщений об изменениях в offer
-    AMQPQueue *mq_advertise_;
-    /// Очередь сообщений об изменениях в конфигурации
-    AMQPQueue *mq_account_;
 
     std::string toString(AMQPMessage *m);
     bool cmdParser(const std::string &cmd, std::string &offerId, std::string &campaignId);

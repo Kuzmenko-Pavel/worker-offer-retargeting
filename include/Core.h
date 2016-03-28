@@ -9,7 +9,6 @@
 #include "Params.h"
 #include "Core_DataBase.h"
 #include "json.h"
-#include "HistoryManager.h"
 
 
 /// Класс, который связывает воедино все части системы.
@@ -36,24 +35,16 @@ private:
     pthread_t tid;
     ///parameters to process: from http GET
     Params *params;
-    ///history manager
-    HistoryManager *hm;
     ///return string
     std::string retHtml;
     ///result offers vector
     Offer::Vector vResult;
-    Offer::Vector vResultSocial;
     ///all offers to show
     Offer::Map items;
     ///campaigns to show set
     std::multiset<unsigned long long> OutPutCampaignSet;
     ///offers to show set
     std::set<unsigned long long> OutPutOfferSet;
-
-    ///campaigns to show set
-    std::multiset<unsigned long long> OutPutSocialCampaignSet;
-    ///offers to show set
-    std::set<unsigned long long> OutPutSocialOfferSet;
     /** \brief Основной алгоритм отбора РП RealInvest Soft. */
     void RISAlgorithm(const Offer::Map &items);
     /** \brief  Возвращает json-представление предложений ``items`` */

@@ -45,8 +45,6 @@ bool DataBase::openDb()
 {
     int flags;
 
-    Config::Instance()->offerSqlStr = getSqlFile("requests/getOffers.sql");
-
     try
     {
         if(pStmt)

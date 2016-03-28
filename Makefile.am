@@ -5,7 +5,6 @@ SRC_ALL=src/base64.cpp \
 		src/Log.cpp \
 		src/BaseCore.cpp \
 		src/DataBase.cpp \
-		src/HistoryManager.cpp \
 		src/main.cpp \
 		src/Server.cpp \
 		src/DB.cpp \
@@ -55,16 +54,12 @@ debian_BUILD = $(bin_PROGRAMS)-$(VERSION)
 dist_doc_DATA=README
 
 sysconf_DATA= \
-db_dump/requests/getOffers.sql \
-db_dump/tables/02_Offer.sql \
-db_dump/tables/18_Informer2OfferRating.sql \
-db_dump/tables/21_Session.sql 
+db_dump/tables/02_Offer.sql 
 
 install_f =\
 echo -n "install to $1"; \
 $(MKDIR_P) $(1)/etc/$(bin_PROGRAMS)/db_dump; \
 $(MKDIR_P) $(1)/etc/$(bin_PROGRAMS)/db_dump/tables; \
-$(MKDIR_P) $(1)/etc/$(bin_PROGRAMS)/db_dump/requests; \
 $(MKDIR_P) $(1)/etc/init.d; \
 $(MKDIR_P) $(1)/usr/sbin; \
 $(SED) 's|/home/alex/Projects/worker|/etc/$(bin_PROGRAMS)|' < ./config.xml > $(1)/etc/$(bin_PROGRAMS)/config-$(bin_PROGRAMS).xml; \
