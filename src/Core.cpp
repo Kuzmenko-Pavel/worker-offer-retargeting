@@ -16,22 +16,14 @@
 #include "DB.h"
 #include "base64.h"
 
-int HistoryManager::request_processed_ = 0;
-int HistoryManager::offer_processed_ = 0;
-int HistoryManager::social_processed_ = 0;
-
 Core::Core()
 {
     tid = pthread_self();
-
-    hm = new HistoryManager();
-
     std::clog<<"["<<tid<<"]core start"<<std::endl;
 }
 //-------------------------------------------------------------------------------------------------------------------
 Core::~Core()
 {
-    delete hm;
 }
 //-------------------------------------------------------------------------------------------------------------------
 std::string Core::Process(Params *prms)
@@ -88,11 +80,8 @@ void Core::ProcessSaveResults()
     //clear all offers map
     items.clear();
     vResult.clear();
-    vResultSocial.clear();
     OutPutCampaignSet.clear();
     OutPutOfferSet.clear();
-    OutPutSocialCampaignSet.clear();
-    OutPutSocialOfferSet.clear();
 
     if(cfg->toLog())
         std::clog<<std::endl;
@@ -125,8 +114,7 @@ void Core::resultHtml()
         printf("%s\n","/////////////////////////////////////////////////////////////////////////");
     #endif // DEBUG
     nlohmann::json j;
-    j["place"] = OffersToJson(vResult);
-    j["social"] = OffersToJson(vResultSocial);
+    j["retargering"] = OffersToJson(vResult);
     retHtml = j.dump();
     #ifdef DEBUG
         auto elapsed = std::chrono::high_resolution_clock::now() - start;
@@ -144,7 +132,8 @@ void Core::RISAlgorithm(const Offer::Map &items)
         printf("RIS offers %lu \n",items.size());
     #endif // DEBUG
     Offer::MapRate result;
-    Offer::MapRate resultSocial;
+    std::map<const unsigned long, int> retargeting_view_offers = params->getRetargetingViewOffers();
+
     if( items.size() == 0)
     {
         std::clog<<"["<<tid<<"]"<<typeid(this).name()<<"::"<<__func__<< "error items size: 0"<<std::endl;
@@ -164,99 +153,106 @@ void Core::RISAlgorithm(const Offer::Map &items)
         {
                 if(!(*i).second->social)
                 {
-                        result.insert(Offer::PairRate((*i).second->rating, (*i).second));
-                }
-                else
-                {
-                        resultSocial.insert(Offer::PairRate((*i).second->rating, (*i).second));
-
+                    result.insert(Offer::PairRate((*i).second->rating, (*i).second));
                 }
         }
     }
-
-    //teaser by unique id and company
+    for(auto i = items.begin(); i != items.end(); i++)
+    {
+        if((*i).second)
+        {
+            if((*i).second->social)
+            {
+                result.insert(Offer::PairRate((*i).second->rating, (*i).second));
+            }
+        }
+    }
     unsigned int passage;
     passage = 0;
-    unsigned int unique_by_campaign;
-    while ((passage < params->getCapacity()) && (vResult.size() < params->getCapacity()))
+    while (passage <= retargeting_view_offers.size())
     {
-        for(auto p = result.begin(); p != result.end(); ++p)
+      for(auto p = result.begin(); p != result.end(); ++p)
         {
-            unique_by_campaign = (*p).second->unique_by_campaign + passage;
-            if(OutPutCampaignSet.count((*p).second->campaign_id) < unique_by_campaign && OutPutOfferSet.count((*p).second->id_int) == 0)
+            std::map<const unsigned long, int>::iterator it= retargeting_view_offers.find((*p).second->id_int);
+            if( it != retargeting_view_offers.end() )
             {
-                if(vResult.size() >= params->getCapacity())
+                if(it->second > passage)
                 {
-                    break;
+                    continue;
                 }
-
+            }
+            if(OutPutCampaignSet.count((*p).second->campaign_id) < (*p).second->unique_by_campaign
+                    && OutPutOfferSet.count((*p).second->id_int) == 0 && !(*p).second->is_recommended)
+            { 
+                if(vResult.size() >= params->getCapacity())
+                    break;
+                
                 vResult.push_back((*p).second);
                 OutPutOfferSet.insert((*p).second->id_int);
                 OutPutCampaignSet.insert((*p).second->campaign_id);
 
             }
+            if ((*p).second->Recommended != "")
+            {
+              if ((*p).second->brending)
+              {
+                  for(auto pr = result.begin(); pr != result.end(); ++pr)
+                    {
+                        if(OutPutOfferSet.count((*pr).second->id_int) == 0 && (*pr).second->is_recommended && (*p).second->campaign_id == (*pr).second->campaign_id )
+                        {
+                            if(vResult.size() >= params->getCapacity())
+                                break;
+                            
+                            vResult.push_back((*pr).second);
+                            OutPutOfferSet.insert((*pr).second->id_int);
+                            OutPutCampaignSet.insert((*pr).second->campaign_id);
+
+                        }
+                    }
+                }
+            }
         }
         passage++;
     }
-    
-    while ((passage < params->getCapacity()) && (vResultSocial.size() < params->getCapacity()))
-    {
-        for(auto p = resultSocial.begin(); p != resultSocial.end(); ++p)
+
+        //add teaser when teaser unique id
+        for(auto p = result.begin(); p!=result.end(); ++p)
         {
-            unique_by_campaign = (*p).second->unique_by_campaign + passage;
-            if(OutPutSocialCampaignSet.count((*p).second->campaign_id) < unique_by_campaign && OutPutSocialOfferSet.count((*p).second->id_int) == 0)
+            if(OutPutCampaignSet.count((*p).second->campaign_id) < (*p).second->unique_by_campaign
+                    && OutPutOfferSet.count((*p).second->id_int) == 0 && !(*p).second->is_recommended)
             {
-                if(vResultSocial.size() >= params->getCapacity())
-                {
+                if(vResult.size() >= params->getCapacity())
                     break;
+                
+                vResult.push_back((*p).second);
+                OutPutOfferSet.insert((*p).second->id_int);
+
+            }
+            if ((*p).second->Recommended != "")
+            {
+              for(auto pr = result.begin(); pr != result.end(); ++pr)
+                {
+                    if(OutPutCampaignSet.count((*pr).second->campaign_id) < (*pr).second->unique_by_campaign
+                            && OutPutOfferSet.count((*pr).second->id_int) == 0 && (*pr).second->is_recommended)
+                    {
+                        if(vResult.size() >= params->getCapacity())
+                            break;
+                        
+                        vResult.push_back((*pr).second);
+                        OutPutOfferSet.insert((*pr).second->id_int);
+
+                    }
                 }
 
-                vResultSocial.push_back((*p).second);
-                OutPutSocialOfferSet.insert((*p).second->id_int);
-                OutPutSocialCampaignSet.insert((*p).second->campaign_id);
-
             }
         }
-        passage++;
-    }
 
-    //teaser by unique id
-    for(auto p = result.begin(); p != result.end(); ++p)
+    if(vResult.size() > params->getCapacity())
     {
-        if(OutPutOfferSet.count((*p).second->id_int) == 0)
-        {
-            if(vResult.size() >= params->getCapacity())
-            {
-                break;
-            }
-
-            vResult.push_back((*p).second);
-            OutPutOfferSet.insert((*p).second->id_int);
-            OutPutCampaignSet.insert((*p).second->campaign_id);
-        }
+        vResult.erase(vResult.begin() + params->getCapacity(), vResult.end());
     }
-
-    for(auto p = resultSocial.begin(); p != resultSocial.end(); ++p)
-    {
-        if(OutPutSocialOfferSet.count((*p).second->id_int) == 0)
-        {
-            if(vResultSocial.size() >= params->getCapacity())
-            {
-                break;
-            }
-
-
-            vResultSocial.push_back((*p).second);
-            OutPutSocialOfferSet.insert((*p).second->id_int);
-            OutPutSocialCampaignSet.insert((*p).second->campaign_id);
-        }
-    }
+    //Offer load
     for(auto p = vResult.begin(); p != vResult.end(); ++p)
-    {
-        (*p)->load();
-        (*p)->gen();
-    }
-    for(auto p = vResultSocial.begin(); p != vResultSocial.end(); ++p)
     {
         (*p)->load();
         (*p)->gen();
@@ -264,8 +260,7 @@ void Core::RISAlgorithm(const Offer::Map &items)
     #ifdef DEBUG
         auto elapsed = std::chrono::high_resolution_clock::now() - start;
         long long microseconds = std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
-        printf("Time %s taken return RIS place offers %lu: %lld \n", __func__,  vResult.size(), microseconds);
-        printf("Time %s taken return RIS social offers %lu: %lld \n", __func__,  vResultSocial.size(), microseconds);
+        printf("Time %s taken return RIS offers %lu: %lld \n", __func__,  vResult.size(), microseconds);
         printf("%s\n","------------------------------------------------------------------");
     #endif // DEBUG
 }

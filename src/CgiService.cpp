@@ -68,22 +68,15 @@ CgiService::CgiService()
 
 void CgiService::run()
 {
-    int loop_count = 0;
     for(;;)
     {
         //read mq and process
         bcore->ProcessMQ();
-        if (loop_count == 72000)
-        {
-            loop_count = 0;
-            bcore->ClearSession(true);
-        }
     
         if(cfg->logMonitor)
         {
             stat->cpuUsage();
         }
-        loop_count++;
         sleep(1);
     }
 }

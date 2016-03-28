@@ -40,6 +40,11 @@ public:
     std::string campaign_guid;
     unsigned unique_by_campaign;
     bool html_notification;                 
+    std::string account_id;
+    std::string Recommended;
+    std::string retid;
+    bool brending;
+    bool is_recommended;
 
     bool loaded = false;
     long long int token_int = 0;
@@ -51,7 +56,12 @@ public:
           float rating,
           int uniqueHits,
           bool social,
+          std::string account_id,
           int unique_by_campaign,
+          std::string Recommended,
+          std::string retid,
+          bool brending,
+          bool is_recommended,
           bool html_notification);
 
     virtual ~Offer();

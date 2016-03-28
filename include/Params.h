@@ -36,7 +36,6 @@ public:
     std::string getCookieId() const;
     std::string getUserKey() const;
     std::string getCampaigns() const;
-    std::string getSocialCampaigns() const;
     std::string getExclude() const;
     unsigned int getCapacity() const;
     long long  getInformerIdInt() const;
@@ -44,6 +43,9 @@ public:
     std::string getInformerId() const;
     boost::posix_time::ptime getTime() const;
     bool isTestMode() const;
+    std::map<const unsigned long,int> getRetargetingOffersDayMap();
+    std::vector<std::string> getRetargetingOffers();
+    std::map<const unsigned long,int> getRetargetingViewOffers();
 
 private:
     boost::u32regex replaceSymbol;
@@ -52,9 +54,11 @@ private:
     std::string informer_id;
     long long informer_id_int;
     std::vector<std::string> exclude;
-    std::vector<std::string> place;
-    std::vector<std::string> social;
+    std::vector<std::string> campaign;
     bool test_mode;
+    std::map<const unsigned long,int> retargeting_offers_day_;
+    std::vector<std::string> retargeting_offers_;
+    std::map<const unsigned long,int> retargeting_view_offers_;
 };
 
 #endif // PARAMS_H
