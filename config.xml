@@ -14,7 +14,7 @@
     <children>1</children>
 
     <!--путь к очереди сообщений-->
-    <mq_path>guest:guest@localhost//</mq_path>
+    <mq_path>worker:worker@rg.yottos.com/worker</mq_path>
 
     <!--путь к фалу базы данных sqlite или :memory:-->
     <sqlite>
