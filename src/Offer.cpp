@@ -62,14 +62,15 @@ nlohmann::json Offer::toJson() const
     j["rating"] = rating;
     j["campaign_id"] = campaign_id;
     j["campaign_guid"] = campaign_guid;
-    j["unique"] = uniqueHits;
     if (is_recommended)
     {
+        j["unique"] = 1;
         j["c"] = "Rec";
         j["branch"] = "NL32";
     }
     else
     {
+        j["unique"] = uniqueHits;
         j["c"] = "Ret";
         j["branch"] = "NL31";
     }
