@@ -6,42 +6,7 @@ libtoolize --install --copy --force --automake
 aclocal -I m4
 autoconf
 autoheader
-automake 
-./configure --enable-dummy
-make clean
-make
-FILE=workerd-dummy
-if [ -f ./$FILE ];
-then
-    echo "$FILE UPDATE"
-    echo "$FILE STOP"
-    monit stop $FILE
-    sleep 10
-    echo "$FILE REMOVE"
-    rm -f /usr/sbin/$FILE
-    echo "$FILE COPY"
-    cp ./$FILE /usr/sbin
-    echo "$FILE START"
-    monit start $FILE 
-else
-    echo "File $FILE does not exist."
-fi
+automake --add-missing
 ./configure
 make clean
 make
-FILE=workerd
-if [ -f ./$FILE ];
-then
-    echo "$FILE UPDATE"
-    echo "$FILE STOP"
-    monit stop $FILE
-    sleep 10
-    echo "$FILE REMOVE"
-    rm -f /usr/sbin/$FILE
-    echo "$FILE COPY"
-    cp ./$FILE /usr/sbin
-    echo "$FILE START"
-    monit start $FILE 
-else
-    echo "File $FILE does not exist."
-fi
