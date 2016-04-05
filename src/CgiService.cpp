@@ -73,10 +73,12 @@ void CgiService::run()
         //read mq and process
         bcore->ProcessMQ();
     
+        #ifdef DEBUG
         if(cfg->logMonitor)
         {
             stat->cpuUsage();
         }
+        #endif // DEBUG
         sleep(1);
     }
 }
