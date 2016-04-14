@@ -5,9 +5,12 @@ AC_INIT([worker-offer-retargeting], m4_esyscmd([echo -n $(git describe --all --t
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE
 
+AC_PROG_CC
 AC_PROG_CXX
 AC_PROG_MAKE_SET
+AC_PROG_RANLIB
 AC_PROG_INSTALL
+AM_PROG_CC_C_O
 
 AC_LANG_CPLUSPLUS
 
@@ -30,11 +33,13 @@ AC_CHECK_FUNCS([strchr])
 AC_CHECK_FUNCS([strerror])
 AC_CHECK_FUNCS([strstr])
 AC_CHECK_FUNCS([strtol])
+AC_CHECK_FUNCS([clock_gettime fdatasync gettimeofday localtime_r memmove memset munmap strdup strerror strtol utime])
 AC_CHECK_HEADERS([arpa/inet.h])
 AC_CHECK_HEADERS([netdb.h])
 AC_CHECK_HEADERS([netinet/in.h])
 AC_CHECK_HEADERS([sys/socket.h])
 AC_CHECK_HEADERS([syslog.h])
+AC_CHECK_HEADERS([fcntl.h inttypes.h limits.h malloc.h stddef.h stdint.h stdlib.h string.h sys/file.h sys/ioctl.h sys/mount.h sys/param.h sys/time.h unistd.h utime.h])
 AC_CHECK_HEADER_STDBOOL
 AC_C_INLINE
 AC_FUNC_ERROR_AT_LINE
