@@ -14,6 +14,7 @@ SRC_ALL=src/base64.cpp \
 		src/UrlParser.cpp \
 		src/Config.cpp \
 		src/KompexSQLiteDatabase.cpp \
+		src/KompexSQLiteBlob.cpp \
 		src/Params.cpp \
 		src/Cookie.cpp \
 		src/KompexSQLiteStatement.cpp \
