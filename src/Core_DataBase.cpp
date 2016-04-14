@@ -32,8 +32,8 @@ bool Core_DataBase::getOffers(Offer::Map &items, Params *_params)
         printf("%s\n","------------------------------------------------------------------");
     #endif // DEBUG
     Kompex::SQLiteStatement *pStmt;
+    long long guid_int = 0;
     params = _params;
-    Offer::Map itemsR;
     std::vector<std::string> VRecommended;
     std::vector<std::string> temp_recommended;
     std::string offerSqlStr;
@@ -112,69 +112,73 @@ bool Core_DataBase::getOffers(Offer::Map &items, Params *_params)
         {
             recomendet_type = "all";
             recomendet_count = 10;
-            Offer *off = new Offer(pStmt->GetColumnInt64(0),     //id
-                                   pStmt->GetColumnInt64(1),    //campaignId
-                                   pStmt->GetColumnDouble(2) - count,  //rating
-                                   pStmt->GetColumnInt(3),    //uniqueHits
-                                   pStmt->GetColumnBool(4),    //social
-                                   pStmt->GetColumnString(5),  //account_id
-                                   pStmt->GetColumnInt(6),      //offer_by_campaign_unique
-                                   pStmt->GetColumnString(7),   //recomendet
-                                   pStmt->GetColumnString(8),   //retid
-                                   pStmt->GetColumnBool(9),    //brending
-                                   false,                       //isrecomendet
-                                   pStmt->GetColumnBool(10)    //notification
-                                  );
-            itemsR.insert(Offer::Pair(off->id_int,off));
-            std::string qr = "";
-            if(off->Recommended != "")
+            guid_int = pStmt->GetColumnInt64(0);
+            if ( items.find(guid_int) == items.end() )
             {
-                day = 0;
-                std::string::size_type sz;
-                long oi = std::stol (pStmt->GetColumnString(8),&sz);
-                std::map<const unsigned long, int>::iterator it= retargeting_offers_day.find(oi);
-                if( it != retargeting_offers_day.end() )
+                Offer *off = new Offer(guid_int,     //id
+                                       pStmt->GetColumnInt64(1),    //campaignId
+                                       pStmt->GetColumnDouble(2) - count,  //rating
+                                       pStmt->GetColumnInt(3),    //uniqueHits
+                                       pStmt->GetColumnBool(4),    //social
+                                       pStmt->GetColumnString(5),  //account_id
+                                       pStmt->GetColumnInt(6),      //offer_by_campaign_unique
+                                       pStmt->GetColumnString(7),   //recomendet
+                                       pStmt->GetColumnString(8),   //retid
+                                       pStmt->GetColumnBool(9),    //brending
+                                       false,                       //isrecomendet
+                                       pStmt->GetColumnBool(10)    //notification
+                                      );
+                items.insert(Offer::Pair(guid_int,off));
+                std::string qr = "";
+                if(off->Recommended != "")
                 {
-                    day = it->second;
-                }
-                recomendet_count = pStmt->GetColumnInt(11);
-                recomendet_type = pStmt->GetColumnString(12);
-                if ( recomendet_type == "min")
-                {
-                    if (recomendet_count - day > 1)
+                    day = 0;
+                    std::string::size_type sz;
+                    long oi = std::stol (pStmt->GetColumnString(8),&sz);
+                    std::map<const unsigned long, int>::iterator it= retargeting_offers_day.find(oi);
+                    if( it != retargeting_offers_day.end() )
                     {
-                        recomendet_count = recomendet_count - day;
+                        day = it->second;
+                    }
+                    recomendet_count = pStmt->GetColumnInt(11);
+                    recomendet_type = pStmt->GetColumnString(12);
+                    if ( recomendet_type == "min")
+                    {
+                        if (recomendet_count - day > 1)
+                        {
+                            recomendet_count = recomendet_count - day;
+                        }
+                        else
+                        {
+                            recomendet_count = 1;
+                        }
+                    }
+                    else if ( recomendet_type == "max")
+                    {
+                        if (1 + day < recomendet_count)
+                        {
+                            recomendet_count = 1 + day;
+                        }
                     }
                     else
                     {
-                        recomendet_count = 1;
+                        if (recomendet_count < 1)
+                        {
+                            recomendet_count = 1;
+                        }
                     }
-                }
-                else if ( recomendet_type == "max")
-                {
-                    if (1 + day < recomendet_count)
+                    temp_recommended.clear();
+                    boost::split(temp_recommended, off->Recommended, boost::is_any_of(","));
+                    if (temp_recommended.begin()+recomendet_count < temp_recommended.end())
                     {
-                        recomendet_count = 1 + day;
+                        temp_recommended.erase(temp_recommended.begin()+recomendet_count, temp_recommended.end());
                     }
+                    qr = "(ofrs.account='" + off->account_id + "' AND ofrs.retid IN (" + boost::algorithm::join(temp_recommended, ", ") + " ))";
+                    VRecommended.push_back(qr);
                 }
-                else
-                {
-                    if (recomendet_count < 1)
-                    {
-                        recomendet_count = 1;
-                    }
-                }
-                temp_recommended.clear();
-                boost::split(temp_recommended, off->Recommended, boost::is_any_of(","));
-                if (temp_recommended.begin()+recomendet_count < temp_recommended.end())
-                {
-                    temp_recommended.erase(temp_recommended.begin()+recomendet_count, temp_recommended.end());
-                }
-                qr = "(ofrs.account='" + off->account_id + "' AND ofrs.retid IN (" + boost::algorithm::join(temp_recommended, ", ") + " ))";
-                VRecommended.push_back(qr);
+                result = true;
+                count++;
             }
-            result = true;
-            count++;
         }
 
         pStmt->FreeQuery();
@@ -213,21 +217,25 @@ bool Core_DataBase::getOffers(Offer::Map &items, Params *_params)
 
             while(pStmt->FetchRow())
             {
-                Offer *off = new Offer(pStmt->GetColumnInt64(0),     //id
-                                       pStmt->GetColumnInt64(1),    //campaignId
-                                       pStmt->GetColumnDouble(2) - count,  //rating
-                                       pStmt->GetColumnInt(3),    //uniqueHits
-                                       pStmt->GetColumnBool(4),    //social
-                                       pStmt->GetColumnString(5),  //account_id
-                                       pStmt->GetColumnInt(6),      //offer_by_campaign_unique
-                                       "",                          //recomendet
-                                       pStmt->GetColumnString(8),   //retid
-                                       false,                       //brending
-                                       true,                        //isrecomendet
-                                       false                        //notification
-                                      );
-                itemsR.insert(Offer::Pair(off->id_int,off));
-                count++;
+                guid_int = pStmt->GetColumnInt64(0);
+                if ( items.find(guid_int) == items.end() )
+                {
+                    Offer *off = new Offer(pStmt->GetColumnInt64(0),     //id
+                                           pStmt->GetColumnInt64(1),    //campaignId
+                                           pStmt->GetColumnDouble(2) - count,  //rating
+                                           pStmt->GetColumnInt(3),    //uniqueHits
+                                           pStmt->GetColumnBool(4),    //social
+                                           pStmt->GetColumnString(5),  //account_id
+                                           pStmt->GetColumnInt(6),      //offer_by_campaign_unique
+                                           "",                          //recomendet
+                                           pStmt->GetColumnString(8),   //retid
+                                           false,                       //brending
+                                           true,                        //isrecomendet
+                                           false                        //notification
+                                          );
+                    items.insert(Offer::Pair(guid_int,off));
+                    count++;
+                }
             }
 
             pStmt->FreeQuery();
@@ -246,15 +254,6 @@ bool Core_DataBase::getOffers(Offer::Map &items, Params *_params)
 
         }
     }
-    
-    for(auto i = itemsR.begin(); i != itemsR.end(); i++)
-    {
-        items.insert(Offer::Pair((*i).first,(*i).second));
-    }
-    
-    itemsR.clear();
-
-
     //clear if there is(are) banner
     #ifdef DEBUG
         auto elapsed = std::chrono::high_resolution_clock::now() - start;

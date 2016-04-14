@@ -1,6 +1,6 @@
 /*
     This file is part of Kompex SQLite Wrapper.
-	Copyright (c) 2008-2013 Sven Broeske
+	Copyright (c) 2008-2014 Sven Broeske
 
     Kompex SQLite Wrapper is free software: you can redistribute it and/or modify
     it under the terms of the GNU Lesser General Public License as published by
@@ -33,11 +33,11 @@
 #endif
 
 #if defined(_MSC_VER) || defined(__BORLANDC__)
-typedef __int64 int64;
-typedef unsigned __int64 uint64;
+	typedef __int64 int64;
+	typedef unsigned __int64 uint64;
 #else
-typedef long long int int64;
-typedef unsigned long long int uint64;
+	typedef long long int int64;
+	typedef unsigned long long int uint64;
 #endif
 
 #endif // KompexSQLitePrerequisites_H

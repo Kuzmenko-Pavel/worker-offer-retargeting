@@ -41,7 +41,11 @@ bool Config::LoadConfig(const std::string fName)
     return Load();
 }
 void Config::exit(const std::string &mes)
-{
+{  
+    if(mDoc)
+    {
+        delete mDoc;
+    }
     std::cerr<<mes<<std::endl;
     std::clog<<mes<<std::endl;
     ::exit(1);
@@ -49,8 +53,6 @@ void Config::exit(const std::string &mes)
 
 bool Config::Load()
 {
-    TiXmlDocument *mDoc;
-    TiXmlElement *mRoot, *mElem, *mel, *mels;
 
     std::clog<<"open config file:"<<mFileName;
 
@@ -351,7 +353,10 @@ bool Config::Load()
 Config::~Config()
 {
     delete pDb;
-
+    if(mDoc)
+    {
+        delete mDoc;
+    }
     mInstance = NULL;
 }
 //---------------------------------------------------------------------------------------------------------------

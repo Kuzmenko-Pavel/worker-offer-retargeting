@@ -18,7 +18,10 @@ ParentDB::ParentDB()
 
 ParentDB::~ParentDB()
 {
-    //dtor
+    if(monga_main)
+    {
+        delete monga_main;
+    }
 }
 
 
@@ -82,19 +85,18 @@ void ParentDB::OfferLoad(mongo::Query q_correct, mongo::BSONObj &camp)
     mongo::BSONObj f = BSON("guid"<<1<<"image"<<1<<"swf"<<1<<"guid_int"<<1<<"RetargetingID"<<1<<"campaignId_int"<<1<<"campaignId"<<1<<"campaignTitle"<<1
             <<"image"<<1<<"uniqueHits"<<1<<"description"<<1
             <<"url"<<1<<"Recommended"<<1<<"title"<<1);
-    std::vector<mongo::BSONObj> bsonobjects;
-    std::vector<mongo::BSONObj>::const_iterator x;
     std::string campaignId = camp.getStringField("guid");
     auto cursor = monga_main->query(cfg->mongo_main_db_ + ".offer", q_correct, 0, 0, &f);
     try{
         unsigned int transCount = 0;
-        pStmt->BeginTransaction();
+        bsonobjects.clear();
         while (cursor->more())
         {
             mongo::BSONObj itv = cursor->next();
             bsonobjects.push_back(itv.copy());
         }
         x = bsonobjects.begin();
+        pStmt->BeginTransaction();
         while(x != bsonobjects.end()) {
             std::string id = (*x).getStringField("guid");
             if (id.empty())

@@ -380,7 +380,6 @@ void CgiService::ProcessRequest(FCGX_Request *req, Core *core)
                         printf("Time %s taken: %lld \n", __func__,  microseconds);
                         printf("%s\n","------------------------------------------------------------------");
                     #endif // DEBUG
-                    core->ProcessSaveResults();
                 }
                 catch (std::exception const &ex)
                 {
@@ -389,6 +388,16 @@ void CgiService::ProcessRequest(FCGX_Request *req, Core *core)
                     Log::err("exception %s: name: %s while processing send response: %s", typeid(ex).name(), ex.what(), query.c_str());
                     Response(req, 503);
                 }
+            }
+            try
+            {
+                core->ProcessSaveResults();
+            }
+            catch (std::exception const &ex)
+            {
+                Log::err(c.to_string().c_str());
+                Log::err(result.c_str());
+                Log::err("exception %s: name: %s while processing save response: %s", typeid(ex).name(), ex.what(), query.c_str());
             }
         }
         catch (std::exception const &ex)

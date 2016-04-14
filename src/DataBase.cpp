@@ -39,6 +39,11 @@ DataBase::~DataBase()
     {
         delete pStmt;
     }
+    if(pDatabase)
+    {
+        pDatabase->Close();
+        delete pDatabase;
+    }
 }
 
 bool DataBase::openDb()

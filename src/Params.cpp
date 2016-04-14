@@ -35,8 +35,7 @@ Params &Params::cookie_id(const std::string &cookie_id)
     else
     {
         cookie_id_ = cookie_id;
-        replaceSymbol = boost::make_u32regex("[^0-9]");
-        cookie_id_ = boost::u32regex_replace(cookie_id_ ,replaceSymbol,"");
+        cookie_id_ = boost::u32regex_replace(cookie_id_ ,replaceSymbolCookies,"");
     }
     boost::trim(cookie_id_);
     key_long = atol(cookie_id_.c_str());
@@ -98,8 +97,7 @@ Params &Params::parse()
     if (params_.count("retargetingOffer") && params_["retargetingOffer"].is_string())
     {
         std::string pla = params_["retargetingOffer"];
-        replaceSymbol = boost::make_u32regex("([A-Za-z\\.:\\-\\s_]+;)|([A-Za-z\\.:\\-\\s_]+)");
-        pla = boost::u32regex_replace(pla,replaceSymbol,"");
+        pla = boost::u32regex_replace(pla,replaceSymbolJson,"");
         boost::trim(pla);
         if(pla != "")
         {
@@ -109,8 +107,7 @@ Params &Params::parse()
     if (params_.count("retargeting_exclude") && params_["retargeting_exclude"].is_string())
     {
         std::string exc = params_["retargeting_exclude"];
-        replaceSymbol = boost::make_u32regex("([A-Za-z\\.:\\-\\s_]+;)|([A-Za-z\\.:\\-\\s_]+)");
-        exc = boost::u32regex_replace(exc,replaceSymbol,"");
+        exc = boost::u32regex_replace(exc,replaceSymbolJson,"");
         boost::trim(exc);
         if(exc != "")
         {
@@ -141,9 +138,9 @@ Params &Params::parse()
         {
             boost::algorithm::to_lower(retargeting);
             boost::split(retargeting_offers_, retargeting, boost::is_any_of(";"));
-            if (retargeting_offers_.size()> 50)
+            if (retargeting_offers_.size()> 150)
             {
-                retargeting_offers_.erase(retargeting_offers_.begin()+49, retargeting_offers_.end());
+                retargeting_offers_.erase(retargeting_offers_.begin()+149, retargeting_offers_.end());
             }
         }
         for (auto i=retargeting_offers_.begin(); i != retargeting_offers_.end() ; ++i)

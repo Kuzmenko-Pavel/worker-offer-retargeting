@@ -48,7 +48,8 @@ public:
     std::map<const unsigned long,int> getRetargetingViewOffers();
 
 private:
-    boost::u32regex replaceSymbol;
+    boost::u32regex replaceSymbolJson = boost::make_u32regex("([A-Za-z\\.:\\-\\s_]+;)|([A-Za-z\\.:\\-\\s_]+)");
+    boost::u32regex replaceSymbolCookies = boost::make_u32regex("[^0-9]");
     nlohmann::json json_;
     unsigned int capacity;
     std::string informer_id;
