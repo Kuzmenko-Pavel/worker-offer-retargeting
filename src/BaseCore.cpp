@@ -23,9 +23,10 @@ BaseCore::BaseCore()
 
     pdb = new ParentDB();
 
+    InitMessageQueue();
+    
     LoadAllEntities();
 
-    InitMessageQueue();
 }
 
 BaseCore::~BaseCore()
