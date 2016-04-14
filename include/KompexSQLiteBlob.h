@@ -19,7 +19,7 @@
 #ifndef KompexSQLiteBlob_H
 #define KompexSQLiteBlob_H
 
-#include <sqlite3.h>
+#include "sqlite3.h"
 
 #include "KompexSQLitePrerequisites.h"
 

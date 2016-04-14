@@ -13,6 +13,7 @@ SRC_ALL=src/base64.cpp \
 		src/EBranch.cpp \
 		src/UrlParser.cpp \
 		src/Config.cpp \
+		src/sqlite3.c \
 		src/KompexSQLiteDatabase.cpp \
 		src/KompexSQLiteBlob.cpp \
 		src/Params.cpp \
