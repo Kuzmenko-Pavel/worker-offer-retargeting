@@ -24,31 +24,33 @@ SRC_ALL=src/base64.cpp \
 		src/Core_DataBase.cpp \
 		src/CpuStat.cpp 
 
-CMN_CPPFLAGS=-std=c++11 -Iinclude
-CMN_CFLAGS= -MMD -MP
+CMN_CPPFLAGS=-std=c++11 -Iinclude -DSQLITE_THREADSAFE=1  -DSQLITE_ENABLE_RTREE=1 -DSQLITE_ENABLE_COLUMN_METADATA=1 -DSQLITE_DEFAULT_MEMSTATUS=0
+CMN_CFLAGS= -Iinclude -DSQLITE_THREADSAFE=1  -DSQLITE_ENABLE_RTREE=1 -DSQLITE_ENABLE_COLUMN_METADATA=1 -DSQLITE_DEFAULT_MEMSTATUS=0
 CMN_LDADD = $(BOOST_DATE_TIME_LIBS) $(BOOST_FILESYSTEM_LIBS) $(BOOST_THREAD_LIBS) $(BOOST_SYSTEM_LIBS) $(BOOST_REGEX_LIBS)
 
 if DEBUG
 bin_PROGRAMS = worker-offer-retargeting-dev
 worker_offer_retargeting_dev_SOURCES=$(SRC_ALL)
 worker_offer_retargeting_dev_CPPFLAGS=$(CMN_CPPFLAGS)
+worker_offer_retargeting_dev_CFLAGS=$(CMN_CFLAGS)
 worker_offer_retargeting_dev_LDADD=$(CMN_LDADD)
 else
 bin_PROGRAMS = worker-offer-retargeting
 worker_offer_retargeting_SOURCES=$(SRC_ALL)
 worker_offer_retargeting_CPPFLAGS=$(CMN_CPPFLAGS)
+worker_offer_retargeting_CFLAGS=$(CMN_CFLAGS)
 worker_offer_retargeting_LDADD=$(CMN_LDADD)
 endif
 
 DEBDEP=bash (>= 2.05a-11), awk, procps (>= 1:2.0.7-8), sed (>= 3.02-8), grep (>= 2.4.2-3), coreutils (>= 5.0-5), libtinyxml2.6.2 (>=2.6.2), libfcgi0ldbl (>=2.4.0), rabbitmq-server (>=3.2.3), libboost-system1.49.0 (>=1.49.0), libboost-regex1.49.0 (>=1.49.0), libboost-thread1.49.0 (>=1.49.0), libboost-filesystem1.49.0 (>=1.49.0), libboost-date-time1.49.0 (>=1.49.0)
 
 if DEBUG
-AM_CFLAGS = -g -DDEBUG -Wall -pipe
-AM_CXXFLAGS = -g -DDEBUG -Wall -pipe
+AM_CFLAGS = -g -DDEBUG -Wall -pipe -DSQLITE_THREADSAFE=1  -DSQLITE_ENABLE_RTREE=1 -DSQLITE_ENABLE_COLUMN_METADATA=1 -DSQLITE_DEFAULT_MEMSTATUS=0
+AM_CXXFLAGS = -g -DDEBUG -Wall -pipe -DSQLITE_THREADSAFE=1  -DSQLITE_ENABLE_RTREE=1 -DSQLITE_ENABLE_COLUMN_METADATA=1 -DSQLITE_DEFAULT_MEMSTATUS=0
 MAKEINIT=0
 else
-AM_CFLAGS = -m64 -Ofast -march=native -funroll-loops -pipe
-AM_CXXFLAGS = -m64 -Ofast -march=native -funroll-loops -pipe
+AM_CFLAGS = -m64 -Ofast -march=native -funroll-loops -pipe -DSQLITE_THREADSAFE=1  -DSQLITE_ENABLE_RTREE=1 -DSQLITE_ENABLE_COLUMN_METADATA=1 -DSQLITE_DEFAULT_MEMSTATUS=0
+AM_CXXFLAGS = -m64 -Ofast -march=native -funroll-loops -pipe -DSQLITE_THREADSAFE=1  -DSQLITE_ENABLE_RTREE=1 -DSQLITE_ENABLE_COLUMN_METADATA=1 -DSQLITE_DEFAULT_MEMSTATUS=0
 MAKEINIT=1
 endif
 
