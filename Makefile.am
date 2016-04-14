@@ -16,15 +16,16 @@ SRC_ALL=src/base64.cpp \
 		src/sqlite3.c \
 		src/KompexSQLiteDatabase.cpp \
 		src/KompexSQLiteBlob.cpp \
+		src/KompexSQLiteStatement.cpp \
 		src/Params.cpp \
 		src/Cookie.cpp \
-		src/KompexSQLiteStatement.cpp \
 		src/ParentDB.cpp \
 		src/BoostHelpers.cpp \
 		src/Core_DataBase.cpp \
 		src/CpuStat.cpp 
 
 CMN_CPPFLAGS=-std=c++11 -Iinclude
+CMN_CFLAGS= -MMD -MP
 CMN_LDADD = $(BOOST_DATE_TIME_LIBS) $(BOOST_FILESYSTEM_LIBS) $(BOOST_THREAD_LIBS) $(BOOST_SYSTEM_LIBS) $(BOOST_REGEX_LIBS)
 
 if DEBUG
@@ -39,7 +40,7 @@ worker_offer_retargeting_CPPFLAGS=$(CMN_CPPFLAGS)
 worker_offer_retargeting_LDADD=$(CMN_LDADD)
 endif
 
-DEBDEP=bash (>= 2.05a-11), awk, procps (>= 1:2.0.7-8), sed (>= 3.02-8), grep (>= 2.4.2-3), coreutils (>= 5.0-5), libtinyxml2.6.2 (>=2.6.2), libsqlite3-0 (>=3.7.13), libfcgi0ldbl (>=2.4.0), rabbitmq-server (>=3.2.3), libboost-system1.49.0 (>=1.49.0), libboost-regex1.49.0 (>=1.49.0), libboost-thread1.49.0 (>=1.49.0), libboost-filesystem1.49.0 (>=1.49.0), libboost-date-time1.49.0 (>=1.49.0)
+DEBDEP=bash (>= 2.05a-11), awk, procps (>= 1:2.0.7-8), sed (>= 3.02-8), grep (>= 2.4.2-3), coreutils (>= 5.0-5), libtinyxml2.6.2 (>=2.6.2), libfcgi0ldbl (>=2.4.0), rabbitmq-server (>=3.2.3), libboost-system1.49.0 (>=1.49.0), libboost-regex1.49.0 (>=1.49.0), libboost-thread1.49.0 (>=1.49.0), libboost-filesystem1.49.0 (>=1.49.0), libboost-date-time1.49.0 (>=1.49.0)
 
 if DEBUG
 AM_CFLAGS = -g -DDEBUG -Wall -pipe
