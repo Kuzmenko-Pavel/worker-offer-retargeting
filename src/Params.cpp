@@ -138,9 +138,9 @@ Params &Params::parse()
         {
             boost::algorithm::to_lower(retargeting);
             boost::split(retargeting_offers_, retargeting, boost::is_any_of(";"));
-            if (retargeting_offers_.size()> 150)
+            if (retargeting_offers_.size()> 200)
             {
-                retargeting_offers_.erase(retargeting_offers_.begin()+149, retargeting_offers_.end());
+                retargeting_offers_.erase(retargeting_offers_.begin()+199, retargeting_offers_.end());
             }
         }
         for (auto i=retargeting_offers_.begin(); i != retargeting_offers_.end() ; ++i)
