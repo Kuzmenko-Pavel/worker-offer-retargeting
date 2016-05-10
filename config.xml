@@ -3,15 +3,15 @@
 <!--настройки сервера-->
 <server>
     <!--IP сервера. Ссылка на редирект по рекламному предложению содержит в себе адрес сервера, который её создал-->
-    <ip>212.113.34.134</ip>
-    <lock_file>/run/workerd/lockr</lock_file>
-    <pid_file>/run/workerd/pidr</pid_file>
+    <ip>212.113.34.133</ip>
+    <lock_file>/run/worker-offer-retargeting/lock</lock_file>
+    <pid_file>/run/worker-offer-retargeting/pid</pid_file>
     <user>www-data</user>
     <group>www-data</group>
     <!--путь к файлу сокета-->
-    <socket_path>/run/workerd/sockr</socket_path>
+    <socket_path>/run/worker-offer-retargeting/sock</socket_path>
     <!--количество ниток-->
-    <children>1</children>
+    <children>100</children>
 
     <!--путь к очереди сообщений-->
     <mq_path>worker:worker@rg.yottos.com/worker</mq_path>
@@ -19,8 +19,8 @@
     <!--путь к фалу базы данных sqlite или :memory:-->
     <sqlite>
         <!--файл базы-->
-        <!--db>:memory:</db-->
-        <db>./db</db>
+        <db>:memory:</db>
+        <!--db>./db</db-->
         <!--путь к каталогу дампа sqlite базы-->
         <schema>db_dump</schema>
         <!--путь к csv файлу содержимого таблицы GeoRerions-->
@@ -38,7 +38,7 @@
     </cookie>
 
     <!--Название скрипта обработки редиректа-->
-    <redirect_script>/redirect</redirect_script>
+    <redirect_script>/click</redirect_script>
 
     <templates>
         <!-- Шаблон информера с тизерами со следующими подстановками (существовавший шаблон):
@@ -180,7 +180,7 @@
     <!--Параметры подключения к базе данных журнала-->
     <log>
         <!--Адрес сервера баз данных-->
-        <host>srv-4.yottos.com:27017</host>
+        <host>127.0.0.1:27017</host>
         <!--Название базы данных-->
         <db>getmyad</db>
         <!--Название группы реплик (если база данных находится в Replica Set)-->
