@@ -10,7 +10,7 @@
 #include "Offer.h"
 #include "../config.h"
 
-#define CMD_SIZE 2621440
+#define CMD_SIZE 1000000
 
 Core_DataBase::Core_DataBase():
     len(CMD_SIZE)

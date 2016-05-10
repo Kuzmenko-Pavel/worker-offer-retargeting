@@ -133,30 +133,37 @@ Params &Params::parse()
     }
     if (params_.count("retargeting") && params_["retargeting"].is_string())
     {
-        std::string retargeting = params_["retargeting"];
-        if(retargeting != "")
+        try
         {
-            boost::algorithm::to_lower(retargeting);
-            boost::split(retargeting_offers_, retargeting, boost::is_any_of(";"));
-        }
-        for (auto i=retargeting_offers_.begin(); i != retargeting_offers_.end() ; ++i)
-        {
-            std::vector<std::string> par;
-            boost::split(par, *i, boost::is_any_of("~"));
-            if (!par.empty() && par.size() >= 4)
+            std::string retargeting = params_["retargeting"];
+            if(retargeting != "")
             {
-                if (!par[0].empty())
+                boost::algorithm::to_lower(retargeting);
+                boost::split(retargeting_offers_, retargeting, boost::is_any_of(";"));
+            }
+            for (auto i=retargeting_offers_.begin(); i != retargeting_offers_.end() ; ++i)
+            {
+                std::vector<std::string> par;
+                boost::split(par, *i, boost::is_any_of("~"));
+                if (!par.empty() && par.size() >= 4)
                 {
-                    try
+                    if (!par[0].empty())
                     {
-                        retargeting_offers_day_.insert(std::pair<const unsigned long,int>(stoul(par[0]),stoi(par[3])));
-                    }
-                    catch (std::exception const &ex)
-                    {
-                        Log::err("exception %s: name: %s while processing etargeting_offers: %s", typeid(ex).name(), ex.what(), (*i).c_str());
+                        try
+                        {
+                            retargeting_offers_day_.insert(std::pair<const unsigned long,int>(stoul(par[0]),stoi(par[3])));
+                        }
+                        catch (std::exception const &ex)
+                        {
+                            Log::err("exception %s: name: %s while processing etargeting_offers: %s", typeid(ex).name(), ex.what(), (*i).c_str());
+                        }
                     }
                 }
             }
+        }
+        catch (std::exception const &ex)
+        {
+            Log::err("exception %s: name: %s while processing retargeting_offers", typeid(ex).name(), ex.what());
         }
     }
     if (params_.count("retargeting_view") && params_["retargeting_view"].is_string())
