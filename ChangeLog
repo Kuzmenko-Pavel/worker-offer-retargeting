@@ -1,4 +1,6 @@
-[33m1ff3082 ([1;36mHEAD[m[33m, [1;31morigin/master[m[33m, [1;32mmaster[m[33m)[m fix memory leak
+[33m0f9da7e ([1;36mHEAD[m[33m, [1;31morigin/master[m[33m, [1;32mmaster[m[33m)[m change retargeting size
+[33mbd516a2[m add sqlite in wodule
+[33m1ff3082[m fix memory leak
 [33m188f20b[m fix memory leak
 [33m737d38a[m fix memory leak
 [33m12fb92d[m fix memory leak

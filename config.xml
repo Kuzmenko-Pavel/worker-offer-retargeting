@@ -160,9 +160,9 @@
     <!--Параметры подключения к основной базе данных-->
     <main>
         <!--Адрес сервера баз данных-->
-        <host>srv-2.yottos.com:27018</host>
+        <host>srv-5.yottos.com:27018</host>
         <host>srv-9.yottos.com:27018</host>
-        <host>srv-1.yottos.com:27018</host>
+        <host>srv-8.yottos.com:27018</host>
         <!--Название базы данных-->
         <db>getmyad_db</db>
         <!--Название группы реплик (если база данных находится в Replica Set)-->
