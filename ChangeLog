@@ -1,4 +1,5 @@
-[33m02d0f42 ([1;36mHEAD[m[33m, [1;31morigin/master[m[33m, [1;31morigin/HEAD[m[33m, [1;32mmaster[m[33m)[m change params
+[33mc668b54 ([1;36mHEAD[m[33m, [1;31morigin/master[m[33m, [1;31morigin/HEAD[m[33m, [1;32mmaster[m[33m)[m fix segfal
+[33m02d0f42[m change params
 [33m0f9da7e[m change retargeting size
 [33mbd516a2[m add sqlite in wodule
 [33m1ff3082[m fix memory leak
