@@ -19,8 +19,8 @@
     <!--путь к фалу базы данных sqlite или :memory:-->
     <sqlite>
         <!--файл базы-->
-        <db>:memory:</db>
-        <!--db>./db</db-->
+        <!--db>:memory:</db-->
+        <db>./db</db>
         <!--путь к каталогу дампа sqlite базы-->
         <schema>db_dump</schema>
         <!--путь к csv файлу содержимого таблицы GeoRerions-->

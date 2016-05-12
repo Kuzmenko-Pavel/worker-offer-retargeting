@@ -10,10 +10,10 @@
 #include "Offer.h"
 #include "../config.h"
 
-#define CMD_SIZE 1000000
+#define CMD_SIZE 999999
 
 Core_DataBase::Core_DataBase():
-    len(CMD_SIZE)
+    len(CMD_SIZE/sizeof(char))
 {
     cmd = new char[len];
 }
@@ -79,7 +79,7 @@ bool Core_DataBase::getOffers(Offer::Map &items, Params *_params)
     where_offers = " WHERE (ofrs.campaignId IN ("+ params->getCampaigns() +") AND ofrs.id NOT IN ("+ params->getExclude() +")) ";
     where_offers += " AND (";
     unsigned int ic = 1;
-    for (auto i=ret.rbegin(); i != ret.rend() ; ++i)
+    for (auto i=ret.begin(); i != ret.end() ; ++i)
     {
         std::vector<std::string> par;
         boost::split(par, *i, boost::is_any_of("~"));
@@ -105,7 +105,7 @@ bool Core_DataBase::getOffers(Offer::Map &items, Params *_params)
     {
 
         pStmt = new Kompex::SQLiteStatement(cfg->pDb->pDatabase);
-
+        
         pStmt->Sql(cmd);
 
         while(pStmt->FetchRow())
