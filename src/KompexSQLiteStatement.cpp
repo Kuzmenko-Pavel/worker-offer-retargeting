@@ -15,7 +15,7 @@
     You should have received a copy of the GNU Lesser General Public License
     along with Kompex SQLite Wrapper. If not, see <http://www.gnu.org/licenses/>.
 */
-
+#include <stdio.h>
 #include <iostream>
 #include <iomanip>
 #include <exception>
@@ -45,6 +45,9 @@ SQLiteStatement::~SQLiteStatement()
 
 void SQLiteStatement::Prepare(const char *sqlStatement)
 {
+    #ifdef DEBUG
+        printf("%s\n",sqlStatement);
+    #endif // DEBUG
 	mIsColumnNumberAssignedToColumnName = false;
 	CheckDatabase();
 
@@ -60,6 +63,9 @@ void SQLiteStatement::Prepare(const char *sqlStatement)
 
 void SQLiteStatement::Prepare(const wchar_t *sqlStatement)
 {
+    #ifdef DEBUG
+        printf("%ls\n",sqlStatement);
+    #endif // DEBUG
 	mIsColumnNumberAssignedToColumnName = false;
 	CheckDatabase();
 
