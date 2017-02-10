@@ -2,8 +2,8 @@
 
 #include "Offer.h"
 #include "Log.h"
-#include "KompexSQLiteStatement.h"
-#include "KompexSQLiteException.h"
+#include <KompexSQLiteStatement.h>
+#include <KompexSQLiteException.h>
 #include "Config.h"
 #include "json.h"
 #include "../config.h"

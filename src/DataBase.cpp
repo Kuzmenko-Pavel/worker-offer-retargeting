@@ -14,7 +14,7 @@
 
 #include "Log.h"
 #include "DataBase.h"
-#include "KompexSQLiteException.h"
+#include <KompexSQLiteException.h>
 #include "Config.h"
 #include "BoostHelpers.h"
 

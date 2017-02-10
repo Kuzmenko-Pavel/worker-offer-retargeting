@@ -17,12 +17,8 @@ extern unsigned long retargeting_processed_;
 class Config
 {
 public:
-    std::vector<std::string> mongo_main_host_;
     std::string mongo_main_db_;
-    std::string mongo_main_set_;
-    bool mongo_main_slave_ok_;
-    std::string mongo_main_login_;
-    std::string mongo_main_passwd_;
+    std::string mongo_main_url_;
     //new params
     std::string server_ip_;
     std::string redirect_script_;
@@ -49,7 +45,7 @@ public:
         //output offer ids
         logOutPutOfferIds,
         logSphinx,
-        logMonitor, logMQ, logRedis
+        logMonitor
         ;
     bool toLog()
     {

@@ -4,8 +4,8 @@
 #include <vector>
 #include <map>
 #include <chrono>
-#include "KompexSQLiteStatement.h"
-#include "KompexSQLiteException.h"
+#include <KompexSQLiteStatement.h>
+#include <KompexSQLiteException.h>
 #include "Config.h"
 #include "Offer.h"
 #include "../config.h"

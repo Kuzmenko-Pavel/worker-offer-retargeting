@@ -13,7 +13,6 @@
 
 #include "Config.h"
 #include "Core.h"
-#include "DB.h"
 #include "base64.h"
 
 Core::Core()
