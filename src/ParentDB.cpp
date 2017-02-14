@@ -4,112 +4,73 @@
 
 #include "ParentDB.h"
 #include "Log.h"
-#include "KompexSQLiteStatement.h"
+#include <mongocxx/instance.hpp>
+#include <mongocxx/client.hpp>
+#include <mongocxx/read_preference.hpp>
+#include <bsoncxx/json.hpp>
+#include <bsoncxx/builder/basic/document.hpp>
+#include <bsoncxx/builder/basic/kvp.hpp>
+#include <mongocxx/options/find.hpp>
+#include <bsoncxx/types.hpp>
+#include <bsoncxx/types/value.hpp>
+#include <bsoncxx/document/value.hpp>
+#include <bsoncxx/document/view.hpp>
+#include <KompexSQLiteStatement.h>
 #include "json.h"
 #include "Config.h"
 #include "Offer.h"
 
+using bsoncxx::builder::basic::document;
+using bsoncxx::builder::basic::sub_document;
+using bsoncxx::builder::basic::kvp;
+using mongocxx::options::find;
+using mongocxx::read_preference;
+
 ParentDB::ParentDB()
 {
     pdb = Config::Instance()->pDb->pDatabase;
-    fConnectedToMainDatabase = false;
-    ConnectMainDatabase();
 }
 
 ParentDB::~ParentDB()
 {
-    if(monga_main)
-    {
-        delete monga_main;
-    }
 }
 
 
-bool ParentDB::ConnectMainDatabase()
+
+void ParentDB::OfferLoad(document &query, nlohmann::json &camp)
 {
-    if(fConnectedToMainDatabase)
-        return true;
-
-    std::vector<mongo::HostAndPort> hvec;
-    for(auto h = cfg->mongo_main_host_.begin(); h != cfg->mongo_main_host_.end(); ++h)
-    {
-        hvec.push_back(mongo::HostAndPort(*h));
-        std::clog<<"Connecting to: "<<(*h)<<std::endl;
-    }
-
-    try
-    {
-        if(!cfg->mongo_main_set_.empty())
-        {
-            monga_main = new mongo::DBClientReplicaSet(cfg->mongo_main_set_, hvec);
-            monga_main->connect();
-        }
-
-
-        if(!cfg->mongo_main_login_.empty())
-        {
-            std::string err;
-            if(!monga_main->auth(cfg->mongo_main_db_,cfg->mongo_main_login_,cfg->mongo_main_passwd_, err))
-            {
-                std::clog<<"auth db: "<<cfg->mongo_main_db_<<" login: "<<cfg->mongo_main_login_<<" error: "<<err<<std::endl;
-            }
-            else
-            {
-                fConnectedToMainDatabase = true;
-            }
-        }
-        else
-        {
-            fConnectedToMainDatabase = true;
-        }
-    }
-    catch (mongo::UserException &ex)
-    {
-        std::clog<<"ParentDB::"<<__func__<<" mongo error: "<<ex.what()<<std::endl;
-        return false;
-    }
-
-    return true;
-}
-
-void ParentDB::OfferLoad(mongo::Query q_correct, mongo::BSONObj &camp)
-{
-    if(!fConnectedToMainDatabase)
-        return;
     Kompex::SQLiteStatement *pStmt;
-    int i = 0,
-    skipped = 0;
+    unsigned int transCount = 0;
+    unsigned int skipped = 0;
     
     pStmt = new Kompex::SQLiteStatement(pdb);
-    mongo::BSONObj o = camp.getObjectField("showConditions");
-    mongo::BSONObj f = BSON("guid"<<1<<"image"<<1<<"swf"<<1<<"guid_int"<<1<<"RetargetingID"<<1<<"campaignId_int"<<1<<"campaignId"<<1<<"campaignTitle"<<1
-            <<"image"<<1<<"uniqueHits"<<1<<"description"<<1
-            <<"url"<<1<<"Recommended"<<1<<"title"<<1);
-    std::string campaignId = camp.getStringField("guid");
-    auto cursor = monga_main->query(cfg->mongo_main_db_ + ".offer", q_correct, 0, 0, &f);
+    nlohmann::json o = camp["showConditions"];
+    std::string campaignId = camp["guid"].get<std::string>();
+    mongocxx::client conn{mongocxx::uri{cfg->mongo_main_url_}};
+    conn.read_preference(read_preference(read_preference::read_mode::k_secondary_preferred));
+    auto coll = conn[cfg->mongo_main_db_]["offer"];
+    auto cursor = coll.find(query.view());
+
+    std::vector<std::string> items;
     try{
-        unsigned int transCount = 0;
-        bsonobjects.clear();
-        while (cursor->more())
-        {
-            mongo::BSONObj itv = cursor->next();
-            bsonobjects.push_back(itv.copy());
-        }
-        x = bsonobjects.begin();
         pStmt->BeginTransaction();
-        while(x != bsonobjects.end()) {
-            std::string id = (*x).getStringField("guid");
+        for (auto &&doc : cursor)
+        {
+               items.push_back(bsoncxx::to_json(doc));
+        }
+        for(auto i : items) {
+            nlohmann::json x = nlohmann::json::parse(i);
+            std::string id = x["guid"].get<std::string>();
             if (id.empty())
             {
                 skipped++;
                 continue;
             }
 
-            std::string image = (*x).getStringField("image");
+            std::string image = x["image"].get<std::string>();
             if (image.empty())
             {
                 skipped++;
-                x++;
                 continue;
             }
 
@@ -158,26 +119,26 @@ void ParentDB::OfferLoad(mongo::Query q_correct, mongo::BSONObj &camp)
                         '%q',\
                         %d,\
                         %d);",
-                (*x).getField("guid_int").numberLong(),
+                x["guid_int"].get<long long>(),
                 id.c_str(),
-                (*x).getStringField("RetargetingID"),
-                (*x).getField("campaignId_int").numberLong(),
-                (*x).getStringField("image"),
-                (*x).getIntField("uniqueHits"),
-                o.getBoolField("brending") ? 1 : 0,
-                (*x).getStringField("description"),
-                (*x).getStringField("url"),
-                (*x).getStringField("Recommended"),
-                 o.hasField("recomendet_type") ? o.getStringField("recomendet_type") : "all",
-                 o.hasField("recomendet_count") ? o.getIntField("recomendet_count") : 10,
-                (*x).getStringField("title"),
+                x["RetargetingID"].get<std::string>(),
+                x["campaignId_int"].get<long long>(),
+                image.c_str(),
+                x["uniqueHits"].get<int>(),
+                o["brending"].get<bool>() ? 1 : 0,
+                x["description"].get<std::string>(),
+                x["url"].get<std::string>(),
+                x["Recommended"].get<std::string>(),
+                 o["recomendet_type"].is_string() ? o["recomendet_type"].get<std::string>() : "all",
+                 o["recomendet_count"].is_number() ? o["recomendet_count"].get<int>() : 10,
+                x["title"].get<std::string>(),
                 campaignId.c_str(),
-                camp.getBoolField("social") ? 1 : 0,
-                o.hasField("offer_by_campaign_unique") ? o.getIntField("offer_by_campaign_unique") : 1,
-                camp.getStringField("account"),
-                o.getStringField("target"),
-                o.hasField("UnicImpressionLot") ? o.getIntField("UnicImpressionLot") : 1,
-                o.getBoolField("html_notification") ? 1 : 0);
+                camp["social"].get<bool>() ? 1 : 0,
+                o["offer_by_campaign_unique"].is_number() ? o["offer_by_campaign_unique"].get<int>() : 1,
+                camp["account"].get<std::string>(),
+                o["target"].get<std::string>(),
+                o["UnicImpressionLot"].is_number() ? o["UnicImpressionLot"].get<int>() : 1,
+                o["html_notification"].get<bool>() ? 1 : 0);
     
             try
             {
@@ -189,8 +150,6 @@ void ParentDB::OfferLoad(mongo::Query q_correct, mongo::BSONObj &camp)
                 skipped++;
             }
             transCount++;
-            i++;
-            x++;
             if (transCount % 1000 == 0)
             {
                 pStmt->CommitTransaction();
@@ -201,7 +160,6 @@ void ParentDB::OfferLoad(mongo::Query q_correct, mongo::BSONObj &camp)
         }
         pStmt->CommitTransaction();
         pStmt->FreeQuery();
-        bsonobjects.clear();
     }
     catch(std::exception const &ex)
     {
@@ -214,7 +172,7 @@ void ParentDB::OfferLoad(mongo::Query q_correct, mongo::BSONObj &camp)
     pStmt->FreeQuery();
     delete pStmt;
 
-    Log::info("Loaded %d offers", i);
+    Log::info("Loaded %d offers", transCount);
     if (skipped)
         Log::warn("Offers with empty id or image skipped: %d", skipped);
 }
@@ -262,58 +220,71 @@ void ParentDB::logDb(const Kompex::SQLiteException &ex) const
 //==================================================================================
 void ParentDB::CampaignLoad(const std::string &aCampaignId)
 {
-    mongo::Query query;
+    auto filter = document{};
 
     if(!aCampaignId.empty())
     {
-        query = mongo::Query("{\"guid\":\""+ aCampaignId +"\", \"status\" : \"working\",\"showConditions.retargeting\":true,\"showConditions.retargeting_type\":\"offer\"}");
+        filter.append(
+                     kvp("showConditions.retargeting", bsoncxx::types::b_bool{true}),
+                      kvp("showConditions.retargeting_type", "offer"),
+                      kvp("status", "working"),
+                      kvp("guid", aCampaignId));
     }
     else
     {
-        query = mongo::Query("{\"status\" : \"working\",\"showConditions.retargeting\":true,\"showConditions.retargeting_type\":\"offer\"}");
+        filter.append(
+                     kvp("showConditions.retargeting", bsoncxx::types::b_bool{true}),
+                      kvp("showConditions.retargeting_type", "offer"),
+                      kvp("status", "working")
+                      );
     }
-    CampaignLoad(query);
+    CampaignLoad(filter);
 }
 /** \brief  Закгрузка всех рекламных кампаний из базы данных  Mongo
 
  */
 //==================================================================================
-void ParentDB::CampaignLoad(mongo::Query q_correct)
+void ParentDB::CampaignLoad(document &query)
 {
-    std::unique_ptr<mongo::DBClientCursor> cursor;
-    int i = 0;
+    int count = 0;
+    mongocxx::client conn{mongocxx::uri{cfg->mongo_main_url_}};
+    conn.read_preference(read_preference(read_preference::read_mode::k_secondary_preferred));
+    auto coll = conn[cfg->mongo_main_db_]["campaign"];
+    auto cursor = coll.find(query.view());
 
-    cursor = monga_main->query(cfg->mongo_main_db_ +".campaign", q_correct);
+    std::vector<std::string> items;
     try{
-    while (cursor->more())
-    {
-        mongo::BSONObj x = cursor->next();
-        std::string id = x.getStringField("guid");
-        if (id.empty())
+        for (auto &&doc : cursor)
         {
-            Log::warn("Campaign with empty id skipped");
-            continue;
+               items.push_back(bsoncxx::to_json(doc));
         }
+        for(auto i : items) {
+            nlohmann::json x = nlohmann::json::parse(i);
+            std::string id = x["guid"].get<std::string>();
+            if (id.empty())
+            {
+                Log::warn("Campaign with empty id skipped");
+                continue;
+            }
 
-        std::string status = x.getStringField("status");
-        
-        CampaignRemove(id);
+            std::string status = x["status"].get<std::string>();
+            
+            CampaignRemove(id);
 
-        if (status != "working")
-        {
-            Log::info("Campaign is hold: %s", id.c_str());
-            continue;
-        }
+            if (status != "working")
+            {
+                Log::info("Campaign is hold: %s", id.c_str());
+                continue;
+            }
 
-        //------------------------Create CAMP-----------------------
-        //Загрузили все предложения
-        mongo::Query q;
-        q = mongo::Query("{\"campaignId\" : \""+ id + "\"}");
-        OfferLoad(q, x);
-        Log::info("Loaded campaign: %s", id.c_str());
-        i++;
-
-    }//while
+            //------------------------Create CAMP-----------------------
+            //Загрузили все предложения
+            auto filter = document{};
+            count++;
+            filter.append(kvp("campaignId", id ));
+            OfferLoad(filter, x);
+            Log::info("Loaded campaign: %s", id.c_str());
+        }//endfor
     }
     catch(std::exception const &ex)
     {
@@ -323,7 +294,7 @@ void ParentDB::CampaignLoad(mongo::Query q_correct)
                  <<std::endl;
     }
 
-    Log::info("Loaded %d campaigns",i); 
+    Log::info("Loaded %d campaigns",count); 
 }
 
 

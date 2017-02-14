@@ -92,25 +92,11 @@ bool Config::Load()
     {
         if( (mel = mels->FirstChildElement("main")) )
         {
-            for(mElem = mel->FirstChildElement("host"); mElem; mElem = mElem->NextSiblingElement("host"))
-            {
-                mongo_main_host_.push_back(mElem->GetText());
-            }
-
             if( (mElem = mel->FirstChildElement("db")) && (mElem->GetText()) )
                 mongo_main_db_ = mElem->GetText();
 
-            if( (mElem = mel->FirstChildElement("set")) && (mElem->GetText()) )
-                mongo_main_set_ = mElem->GetText();
-
-            if( (mElem = mel->FirstChildElement("slave")) && (mElem->GetText()) )
-                mongo_main_slave_ok_ = strncmp(mElem->GetText(),"1",1)>=0 ? true : false;
-
-            if( (mElem = mel->FirstChildElement("login")) && (mElem->GetText()) )
-                mongo_main_login_ = mElem->GetText();
-
-            if( (mElem = mel->FirstChildElement("passwd")) && (mElem->GetText()) )
-                mongo_main_passwd_ = mElem->GetText();
+            if( (mElem = mel->FirstChildElement("url")) && (mElem->GetText()) )
+                mongo_main_url_ = mElem->GetText();
         }
         else
         {
@@ -320,21 +306,13 @@ bool Config::Load()
         {
             logMonitor = strncmp(mel->GetText(),"1",1)>=0 ? true : false;
         }
-        if( (mel = mElem->FirstChildElement("redis")) && (mel->GetText()) )
-        {
-            logRedis = strncmp(mel->GetText(),"1",1)>=0 ? true : false;
-        }
-        if( (mel = mElem->FirstChildElement("logMQ")) && (mel->GetText()) )
-        {
-            logMQ = strncmp(mel->GetText(),"1",1)>=0 ? true : false;
-        }
     }
     else
     {
         logCoreTime = logOutPutSize = logIP = true;
 
         logLocation = logInformerId = logSearch =
-        logContext = logCookie = logCountry = logRegion = logMonitor = logMQ = logRedis = false;
+        logContext = logCookie = logCountry = logRegion = logMonitor = false;
 
         std::clog<<"using default log mode: CoreTime OutPutSize IP"<<std::endl;
     }

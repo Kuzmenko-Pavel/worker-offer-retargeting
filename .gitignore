@@ -30,7 +30,8 @@ Makefile.in
 /configure
 /configure.scan
 /depcomp
-/.deps
+.deps
+.dirstamp
 /install-sh
 /missing
 /m4/
@@ -99,3 +100,6 @@ Makefile.in
 
 # Debug files
 *.dSYM/
+
+
+worker-offer-retargeting-dev

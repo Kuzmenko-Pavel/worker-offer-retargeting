@@ -11,8 +11,8 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#include "KompexSQLiteDatabase.h"
-#include "KompexSQLiteStatement.h"
+#include <KompexSQLiteDatabase.h>
+#include <KompexSQLiteStatement.h>
 
 class DataBase
 {

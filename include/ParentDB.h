@@ -1,10 +1,11 @@
 #ifndef PARENTDB_H
 #define PARENTDB_H
+#include <bsoncxx/builder/basic/document.hpp>
+#include <KompexSQLiteDatabase.h>
+#include <KompexSQLiteException.h>
+#include "json.h"
 
-#include <mongo/client/dbclient_rs.h>
-
-#include "KompexSQLiteDatabase.h"
-#include "KompexSQLiteException.h"
+using bsoncxx::builder::basic::document;
 
 class ParentDB
 {
@@ -12,24 +13,16 @@ public:
     ParentDB();
     virtual ~ParentDB();
 
-    void OfferLoad(mongo::Query, mongo::BSONObj &camp);
+    void OfferLoad(document &query, nlohmann::json &camp);
     void OfferRemove(const std::string &id);
     void CampaignLoad(const std::string &campaignId = std::string());
-    void CampaignLoad(mongo::Query=mongo::Query());
+    void CampaignLoad(document &query);
     void CampaignRemove(const std::string &aCampaignId);
 
 private:
-    std::vector<mongo::BSONObj> bsonobjects;
-    std::vector<mongo::BSONObj>::const_iterator x;
-    bool fConnectedToMainDatabase;
     Kompex::SQLiteDatabase *pdb;
     char buf[262144];
-    mongo::DBClientReplicaSet *monga_main;
-
     void logDb(const Kompex::SQLiteException &ex) const;
-
-
-    bool ConnectMainDatabase();
 };
 
 #endif // PARENTDB_H
