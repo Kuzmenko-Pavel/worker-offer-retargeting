@@ -1,5 +1,4 @@
 #!/bin/bash
-#apt-get install automake libtool libtinyxml2-dev libtinyxml-dev
 git log --date=short  --pretty=format:"%h - %ad, %an <%ae>, %ar : %s" > CHANGELOG
 git log --format='%aN <%aE>' | sort -f | uniq > AUTHORS
 libtoolize --install --copy --force --automake
