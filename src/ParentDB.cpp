@@ -26,6 +26,8 @@ using bsoncxx::builder::basic::kvp;
 using mongocxx::options::find;
 using mongocxx::read_preference;
 
+mongocxx::instance instance{};
+
 ParentDB::ParentDB()
 {
     pdb = Config::Instance()->pDb->pDatabase;
@@ -121,22 +123,22 @@ void ParentDB::OfferLoad(document &query, nlohmann::json &camp)
                         %d);",
                 x["guid_int"].get<long long>(),
                 id.c_str(),
-                x["RetargetingID"].get<std::string>(),
+                x["RetargetingID"].get<std::string>().c_str(),
                 x["campaignId_int"].get<long long>(),
                 image.c_str(),
                 x["uniqueHits"].get<int>(),
                 o["brending"].get<bool>() ? 1 : 0,
-                x["description"].get<std::string>(),
-                x["url"].get<std::string>(),
-                x["Recommended"].get<std::string>(),
-                 o["recomendet_type"].is_string() ? o["recomendet_type"].get<std::string>() : "all",
+                x["description"].get<std::string>().c_str(),
+                x["url"].get<std::string>().c_str(),
+                x["Recommended"].get<std::string>().c_str(),
+                 o["recomendet_type"].is_string() ? o["recomendet_type"].get<std::string>().c_str() : "all",
                  o["recomendet_count"].is_number() ? o["recomendet_count"].get<int>() : 10,
-                x["title"].get<std::string>(),
+                x["title"].get<std::string>().c_str(),
                 campaignId.c_str(),
                 camp["social"].get<bool>() ? 1 : 0,
                 o["offer_by_campaign_unique"].is_number() ? o["offer_by_campaign_unique"].get<int>() : 1,
-                camp["account"].get<std::string>(),
-                o["target"].get<std::string>(),
+                camp["account"].get<std::string>().c_str(),
+                o["target"].get<std::string>().c_str(),
                 o["UnicImpressionLot"].is_number() ? o["UnicImpressionLot"].get<int>() : 1,
                 o["html_notification"].get<bool>() ? 1 : 0);
     

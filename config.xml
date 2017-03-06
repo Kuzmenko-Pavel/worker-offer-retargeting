@@ -14,7 +14,7 @@
     <children>1</children>
 
     <!--путь к очереди сообщений-->
-    <mq_path>test:test@localhost//</mq_path>
+    <mq_path>test-worker:test-worker@srv-4.yottos.com/test-worker</mq_path>
 
     <!--путь к фалу базы данных sqlite или :memory:-->
     <sqlite>
